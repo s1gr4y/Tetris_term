@@ -1,0 +1,1 @@
+g++ -I ./src/include/ ./src/*.cpp ./src/engine/*.cpp ./src/utils/*.cpp -o tetris
