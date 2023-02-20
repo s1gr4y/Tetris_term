@@ -144,7 +144,11 @@ void Engine::GameLoop() {
 			}
 			break;
 		case 'P':	//down
-			BlockMoveDownOne();
+			if (!BlockMoveDownOne()) {
+				if (SpawnBlock()) {
+					goto END;
+				}
+			}
 			break;
 		case 'K':	//left
 			if (IsValidMove(-1)) {
@@ -165,6 +169,7 @@ void Engine::GameLoop() {
 			{
 			for (int i = 0; i < rowCount; i++) {	//a bit hard to read might change
 				if (!BlockMoveDownOne()) {
+					SpawnBlock();
 					break;
 				}
 			}
@@ -179,12 +184,17 @@ void Engine::GameLoop() {
 		printf("%d\tTime since starting the program: %f\n", Printer::inc(), totalTime);
 		printf("%d\tRead in %c\n", Printer::inc(), c);
 		
-		printf("                                     \r");	//printf("\33[2K");	//clearing line for coords //or use printf("\r\t\t\t\t\t\t\t");
-		printf("%d\tCurrent BLK coords %d, %d\n", Printer::inc(), currBlock->r, currBlock->c);
+		//printf("                                     \r");	//printf("\33[2K");	//clearing line for coords //or use printf("\r\t\t\t\t\t\t\t");
+		//printf("%d\tCurrent BLK coords %d, %d\n", Printer::inc(), currBlock->r, currBlock->c);
+		printf("%d\tScore: %li\n", Printer::inc(), Score);
 		printf("%d\tNext BLK is %d\n", Printer::inc(), currBlock->index);
 		///*
 		if (FrameAction(66l)) {
-			BlockMoveDownOne();
+			if (!BlockMoveDownOne()) {
+				if (SpawnBlock()) {
+					goto END;
+				}
+			}
 		}
 		//*/
 		PrintBoard();
@@ -200,6 +210,9 @@ void Engine::GameLoop() {
 		Printer::ResetLineCount();
 		PrintStatus(true);	//fliping print state
 	}
+	
+END:
+	Printer::CLR_SRC();
 	Printer::EnableCursor();
 }
 
@@ -389,15 +402,23 @@ bool Engine::CanMoveDown() {
 }
 
 bool Engine::BlockMoveDownOne() {
+	int counter = 0;
 	if (!CanMoveDown()) {
 		WriteBoard();
 	chain:
 		int row = RowCleared();
 		if (row >= 0) {
+			counter++;
 			ShiftDownRow(row);
 			goto chain;	//could also do loop here with seek index to check for more clears
 		}
-		SpawnBlock();
+		if (counter == 1) {
+			Score += 100;
+		} else if (counter == 2) {
+			Score += 300;
+		} else if (counter >= 3) {
+			Score += counter * 150;
+		}
 		return false;
 	} else {
 		currBlock->r += 1;
