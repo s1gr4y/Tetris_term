@@ -11,16 +11,14 @@
 #ifdef _WIN32	
 	#include <Windows.h>
 	#include <conio.h>
-	#define kbhit() _kbhit()
 	
-	#define getCharInp() _getch()
-	//#define sleep(val) Sleep(val)
+	#define Clear_Board() Printer::Windows_goto_xy(0, 0)
 #else
 	#include <sys/ioctl.h> //fionread
 	#include <termios.h>
 	#include <stdbool.h>
 	
-	#define getCharInp() getChar()
+	#define Clear_Board() Printer::Linux_clear()
 #endif
 
 using namespace std;
@@ -40,7 +38,13 @@ public:
 	static void EnableCursor();
 	static void CLR_SRC();
 	
+	#ifdef _WIN32
+	static void Windows_goto_xy(short x, short y);
+	#endif
 	
+	#ifdef __linux__
+	static void Printer::Linux_clear();
+	#endif
 	
 	#ifdef __linux__ 
 	static int kbhit();

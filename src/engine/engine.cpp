@@ -94,8 +94,8 @@ void Engine::GameLoop() {
 	Printer::HideCursor();
 	Printer::CLR_SRC();
 	
-	start_clk = clock();
-	end_clk = clock();
+	start_clk = steady_clock::now();
+	end_clk = steady_clock::now();
 	
 	//board[0][0] = 'X';
 	/*
@@ -113,10 +113,12 @@ void Engine::GameLoop() {
 	*/
 	char c = 0;
 	while (1) {
-		end_clk = clock();
-		double seconds = (double)(end_clk - start_clk) / CLOCKS_PER_SEC;
+		end_clk = steady_clock::now();
+		double seconds = (duration_cast<milliseconds>(end_clk - start_clk)).count(); //(std::chrono::duration<double>(end_clk - start_clk)).count();
+		seconds /= 1000;
 		
-		start_clk = clock();
+		start_clk = steady_clock::now();
+		//std::this_thread::sleep_for(std::chrono::milliseconds(14));
 		
 		dt = seconds;
 		totalTime += dt;
@@ -169,7 +171,9 @@ void Engine::GameLoop() {
 			{
 			for (int i = 0; i < rowCount; i++) {	//a bit hard to read might change
 				if (!BlockMoveDownOne()) {
-					SpawnBlock();
+					if (SpawnBlock()) {
+						goto END;
+					}
 					break;
 				}
 			}
@@ -199,13 +203,8 @@ void Engine::GameLoop() {
 		//*/
 		PrintBoard();
 
-
-		string formater = "";
-		for (int i = 0; i < Printer::GetLineCount(); i++) {
-			formater += "\033[F";
-		}
+		Clear_Board();
 		
-		printf("%s", formater.c_str());
 		//Printer::CLR_SRC();	//bc if we have extra lines from last frame we don't clear it.
 		Printer::ResetLineCount();
 		PrintStatus(true);	//fliping print state
@@ -214,6 +213,13 @@ void Engine::GameLoop() {
 END:
 	Printer::CLR_SRC();
 	Printer::EnableCursor();
+	#ifdef __linux__
+		struct termios term;
+		tcgetattr(STDIN, &term);
+		term.c_lflag |= ECHO;
+		tcsetattr(STDIN, TCSANOW, &term);
+		setbuf(stdin, NULL);
+	#endif
 }
 
 void Engine::PrintBoard() {

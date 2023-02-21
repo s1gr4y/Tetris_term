@@ -30,8 +30,7 @@ public:
 	Block(int array[][4], int size, bool multiRotate, int id);
 	//Block& operator=(const Block &blk);
 	//Block& operator=(Block &&blk);
-	
-	init();
+
 	void rotateLeft();
 	void rotateRight();
 	void blkReset();	//reset orientation and position.

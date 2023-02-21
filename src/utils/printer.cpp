@@ -27,7 +27,22 @@ void Printer::CLR_SRC() {
 	write(STDOUT_FILENO, CLEAR_SCREEN_ANSI, 12);
 }
 
+#ifdef _WIN32
+void Printer::Windows_goto_xy(short x, short y) {
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), (COORD){x, y});
+}
+#endif
 
+#ifdef __linux__
+void Printer::Linux_clear() {
+    string formater = "";
+	for (int i = 0; i < Printer::GetLineCount(); i++) {
+		formater += "\033[1F";
+	}
+	
+	printf("%s", formater.c_str());
+}
+#endif
 
 
 #ifdef __linux__
@@ -40,6 +55,7 @@ int Printer::kbhit() {
         struct termios term;
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
+		term.c_lflag &= ~ECHO;
         tcsetattr(STDIN, TCSANOW, &term);
         setbuf(stdin, NULL);
         initflag = true;

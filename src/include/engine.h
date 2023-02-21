@@ -2,12 +2,24 @@
 #define ENGINE_H
 
 #include <time.h>
+#include <chrono>
+#include <thread>
 
 #include "printer.h"
 #include "block.h"
 #include "constants.h"
 
+#ifdef _WIN32	
+	#define getKey() _kbhit()
+	#define getCharInp() _getch()
+#else
+	#define getCharInp() getchar()
+	#define getKey() Printer::kbhit()
+#endif
+
 using namespace UniversalVars;
+using namespace std;
+using namespace chrono;
 
 class Engine {
 	
@@ -20,8 +32,11 @@ class Engine {
 	long int tick;
 	double tick_float;
 	
-	clock_t start_clk;
-	clock_t end_clk;
+	//clock_t start_clk;
+	//clock_t end_clk;
+	
+	steady_clock::time_point start_clk;
+	steady_clock::time_point end_clk;
 	
 	char** board = NULL;
 	

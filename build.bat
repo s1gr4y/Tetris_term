@@ -1,1 +1,1 @@
-g++ -I ./src/include/ ./src/*.cpp ./src/engine/*.cpp ./src/utils/*.cpp -o tetris
+g++ -std=c++11 -static -static-libgcc -static-libstdc++ -I ./src/include/ ./src/*.cpp ./src/engine/*.cpp ./src/utils/*.cpp -o tetris
